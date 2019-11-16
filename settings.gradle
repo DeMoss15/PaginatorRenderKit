@@ -1,2 +1,2 @@
-include ':app'
+include ':app', ':paginatorrenderkit'
 rootProject.name='My Application'
