@@ -44,6 +44,7 @@ class PaginatorViewDelegate(
             setHasFixedSize(true)
             adapter = this@PaginatorViewDelegate.adapter
         }
+        refreshCallback?.invoke()
     }
 
     fun render(state: Paginator.State<AbsPaginalItem<*>>) {

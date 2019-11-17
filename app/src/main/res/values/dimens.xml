@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--Layout Linage-->
+    <dimen name="base_2dp">2dp</dimen>
+    <dimen name="base_4dp">4dp</dimen>
+    <dimen name="base_8dp">8dp</dimen>
+    <dimen name="base_12dp">12dp</dimen>
+    <dimen name="base_16dp">16dp</dimen>
+    <dimen name="base_20dp">20dp</dimen>
+    <dimen name="base_24dp">24dp</dimen>
+    <dimen name="base_28dp">28dp</dimen>
+    <dimen name="base_32dp">32dp</dimen>
+    <dimen name="base_36dp">36dp</dimen>
+
+    <!--Text sizes-->
+    <dimen name="small_text">8sp</dimen>
+    <dimen name="medium_text">16sp</dimen>
+    <dimen name="big_text">24sp</dimen>
+
+    <dimen name="article_image_height">200dp</dimen>
+</resources>
