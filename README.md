@@ -8,6 +8,24 @@ The library is based on solutions developed by:
 * Konstantin Tskhovrebov aka terrakok, see [source code of the GitFox client](https://gitlab.com/terrakok/gitlab-client) and [Konstantin's standup at Yandex Academy](https://www.youtube.com/watch?v=h5afEeuI0GQ) about Paginator itself
 * Hannes Dorfmann aka sockeqwe, see [the Adapter Delegates library](https://github.com/sockeqwe/AdapterDelegates) and [Hannes's article about the library](http://hannesdorfmann.com/android/adapter-delegates)
 
+### Dependencies
+* Step 1. Add jitpack repository to your root `build.gradle` file:
+```
+allprojects {
+   repositories {
+      ...
+      maven { url 'https://jitpack.io' }
+   }
+}
+```
+* Step 2. Add dependency in application module `build.gradle` :
+```
+dependencies {
+   implementation 'com.github.DeMoss15:PaginatorRenderKit:$paginatorRenderKitVersion'
+}
+```
+
+
 # [License](https://github.com/DeMoss15/PaginatorRenderKit/blob/master/LICENSE)
 ```
 Copyright 2019 Daniel Mossur
