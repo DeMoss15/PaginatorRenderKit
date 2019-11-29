@@ -1,19 +1,13 @@
 package com.demoss.paginatorrenderkit
 
-import android.content.Context
-import android.util.AttributeSet
-import android.view.LayoutInflater
-import android.widget.FrameLayout
+import android.view.View
+import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 
-class PaginatorView @JvmOverloads constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
-) : FrameLayout(context, attrs, defStyleAttr) {
+interface PaginatorView {
 
-    init {
-        LayoutInflater
-            .from(context)
-            .inflate(R.layout.view_paginator, this, true)
-    }
+    fun getRecyclerView(): RecyclerView
+    fun getSwipeToRefresh(): SwipeRefreshLayout
+    fun getEmptyView(): PaginatorEmptyView
+    fun getFullScreenProgressView(): View
 }

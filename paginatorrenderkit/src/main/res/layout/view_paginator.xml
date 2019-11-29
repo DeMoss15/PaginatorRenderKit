@@ -25,7 +25,7 @@
         android:layout_gravity="center"
         android:visibility="gone"/>
 
-    <com.demoss.paginatorrenderkit.PaginatorDefaultEmptyView
+    <com.demoss.paginatorrenderkit.todelete.BasePaginatorEmptyView
         android:id="@+id/emptyView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

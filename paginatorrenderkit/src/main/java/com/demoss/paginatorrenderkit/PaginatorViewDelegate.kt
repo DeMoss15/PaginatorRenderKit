@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.hannesdorfmann.adapterdelegates4.AdapterDelegate
 import com.hannesdorfmann.adapterdelegates4.AsyncListDifferDelegationAdapter
-import kotlinx.android.synthetic.main.view_paginator.view.*
 
 class PaginatorViewDelegate(
     private var refreshCallback: (() -> Unit)? = null,
@@ -28,10 +27,10 @@ class PaginatorViewDelegate(
     ) : this(
         refreshCallback,
         nextPageCallback,
-        paginatorView.recyclerView,
-        paginatorView.swipeToRefresh,
-        paginatorView.emptyView as PaginatorEmptyView,
-        paginatorView.fullscreenProgressView,
+        paginatorView.getRecyclerView(),
+        paginatorView.getSwipeToRefresh(),
+        paginatorView.getEmptyView(),
+        paginatorView.getFullScreenProgressView(),
         *delegate
     )
 
