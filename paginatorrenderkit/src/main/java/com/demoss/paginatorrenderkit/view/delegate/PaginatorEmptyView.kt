@@ -1,4 +1,4 @@
-package com.demoss.paginatorrenderkit
+package com.demoss.paginatorrenderkit.view.delegate
 
 import android.content.Context
 import android.util.AttributeSet

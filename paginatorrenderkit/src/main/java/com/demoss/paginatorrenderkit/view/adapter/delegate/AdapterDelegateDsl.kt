@@ -1,30 +1,26 @@
-package com.demoss.paginatorrenderkit
+package com.demoss.paginatorrenderkit.view.adapter.delegate
 
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.LayoutRes
 import androidx.recyclerview.widget.RecyclerView
+import com.demoss.paginatorrenderkit.view.inflate
+import com.demoss.paginatorrenderkit.view.model.PaginatorItem
 import com.hannesdorfmann.adapterdelegates4.AdapterDelegate
 
 inline fun <reified T : Any> mutableAdapterDelegate(
     @LayoutRes layout: Int,
-//    customTypes: List<Class<*>> = listOf(),
     crossinline viewHolderFabric: (View) -> AbsVH<in T>
-) = object : AdapterDelegate<MutableList<AbsPaginalItem<*>>>() {
+) = object : AdapterDelegate<MutableList<PaginatorItem<*>>>() {
 
     override fun onCreateViewHolder(parent: ViewGroup): RecyclerView.ViewHolder =
         viewHolderFabric(parent.inflate(layout))
 
-    // /////////////////////////////////////////////////////////////////////////
-    // The adapter delegate will be used for T type and for it's child [AbsPaginalItem.isChildOf()].
-    // in case of need to make exception for this rule use commented code with customTypes
-    // ////////////////////////////////////////////////////////////////////////
-    override fun isForViewType(items: MutableList<AbsPaginalItem<*>>, position: Int): Boolean =
-        items[position].isForViewType(T::class.java) || items[position].isChildOf<T>()/*||
-                customTypes.find { items[position].isForViewType(it) } != null*/
+    override fun isForViewType(items: MutableList<PaginatorItem<*>>, position: Int): Boolean =
+        items[position].isForViewType(T::class.java)
 
     override fun onBindViewHolder(
-        items: MutableList<AbsPaginalItem<*>>,
+        items: MutableList<PaginatorItem<*>>,
         position: Int,
         holder: RecyclerView.ViewHolder,
         payloads: MutableList<Any>

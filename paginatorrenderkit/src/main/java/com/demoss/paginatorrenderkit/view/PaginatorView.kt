@@ -1,9 +1,10 @@
-package com.demoss.paginatorrenderkit
+package com.demoss.paginatorrenderkit.view
 
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import com.demoss.paginatorrenderkit.R
 
 class PaginatorView @JvmOverloads constructor(
     context: Context,

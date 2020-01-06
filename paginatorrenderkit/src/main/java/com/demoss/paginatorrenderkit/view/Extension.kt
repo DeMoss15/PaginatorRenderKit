@@ -1,4 +1,4 @@
-package com.demoss.paginatorrenderkit
+package com.demoss.paginatorrenderkit.view
 
 import android.view.LayoutInflater
 import android.view.View

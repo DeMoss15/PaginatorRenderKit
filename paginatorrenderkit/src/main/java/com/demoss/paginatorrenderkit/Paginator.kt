@@ -1,95 +1,30 @@
 package com.demoss.paginatorrenderkit
 
-import com.jakewharton.rxrelay2.PublishRelay
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
 import timber.log.Timber
-import java.util.concurrent.Executors
 
 object Paginator {
 
     sealed class State<T> {
+
+        open fun getStateData(): List<T> = emptyList<T>()
+
         class Empty<T> : State<T>()
         class EmptyProgress<T> : State<T>()
         data class EmptyError<T>(val error: Throwable) : State<T>()
         data class Data<T>(val pageCount: Int, val data: List<T>) : State<T>() {
-            override fun equals(other: Any?): Boolean {
-                if (this === other) return true
-                if (javaClass != other?.javaClass) return false
-
-                other as Data<*>
-
-                if (pageCount != other.pageCount) return false
-                if (data != other.data) return false
-
-                return true
-            }
-
-            override fun hashCode(): Int {
-                var result = pageCount
-                result = 31 * result + data.hashCode()
-                return result
-            }
+            override fun getStateData(): List<T> = data
         }
 
         data class Refresh<T>(val pageCount: Int, val data: List<T>) : State<T>() {
-            override fun equals(other: Any?): Boolean {
-                if (this === other) return true
-                if (javaClass != other?.javaClass) return false
-
-                other as Refresh<*>
-
-                if (pageCount != other.pageCount) return false
-                if (data != other.data) return false
-
-                return true
-            }
-
-            override fun hashCode(): Int {
-                var result = pageCount
-                result = 31 * result + data.hashCode()
-                return result
-            }
+            override fun getStateData(): List<T> = data
         }
 
         data class NewPageProgress<T>(val pageCount: Int, val data: List<T>) : State<T>() {
-            override fun equals(other: Any?): Boolean {
-                if (this === other) return true
-                if (javaClass != other?.javaClass) return false
-
-                other as NewPageProgress<*>
-
-                if (pageCount != other.pageCount) return false
-                if (data != other.data) return false
-
-                return true
-            }
-
-            override fun hashCode(): Int {
-                var result = pageCount
-                result = 31 * result + data.hashCode()
-                return result
-            }
+            override fun getStateData(): List<T> = data
         }
 
         data class FullData<T>(val pageCount: Int, val data: List<T>) : State<T>() {
-            override fun equals(other: Any?): Boolean {
-                if (this === other) return true
-                if (javaClass != other?.javaClass) return false
-
-                other as FullData<*>
-
-                if (pageCount != other.pageCount) return false
-                if (data != other.data) return false
-
-                return true
-            }
-
-            override fun hashCode(): Int {
-                var result = pageCount
-                result = 31 * result + data.hashCode()
-                return result
-            }
+            override fun getStateData(): List<T> = data
         }
     }
 
@@ -97,17 +32,18 @@ object Paginator {
         class Refresh<T> : Action<T>()
         class Restart<T> : Action<T>()
         class LoadMore<T> : Action<T>()
-        data class UpdateItem<T>(val item: T, val compareItemPredicate: (other: T) -> Boolean) : Action<T>()
-
-        data class DeleteItem<T>(val index: Int) : Action<T>()
-        data class NewPage<T>(val pageNumber: Int, val items: List<T>) : Action<T>()
-        data class InsertData<T>(val position: Int, val items: List<T>) : Action<T>()
+        data class NewPage<T>(val pageNumber: Int, val items: List<T>, val isLastPage: Boolean) : Action<T>()
         data class PageError<T>(val error: Throwable) : Action<T>()
+        // TODO: review next actions
+        data class AddItems<T>(val position: Int, val items: List<T>) : Action<T>()
+        data class UpdateItem<T>(val item: T, val compareItemPredicate: (other: T) -> Boolean) : Action<T>()
+        data class DeleteItem<T>(val index: Int) : Action<T>()
     }
 
     sealed class SideEffect {
         data class LoadPage(val currentPage: Int) : SideEffect()
         data class ErrorEvent(val error: Throwable) : SideEffect()
+        object CancelLoadings : SideEffect()
     }
 
     private fun <T> List<T>.replace(
@@ -133,35 +69,36 @@ object Paginator {
     ): State<T> =
         when (action) {
             is Action.Refresh -> {
-                sideEffectListener(
-                    SideEffect.LoadPage(
-                        1
-                    )
-                )
                 when (state) {
                     is State.Empty -> State.EmptyProgress()
                     is State.EmptyError -> State.EmptyProgress()
-                    is State.Data -> State.Refresh(
-                        state.pageCount,
-                        state.data
-                    )
-                    is State.NewPageProgress -> State.Refresh(
-                        state.pageCount,
-                        state.data
-                    )
-                    is State.FullData -> State.Refresh(
-                        state.pageCount,
-                        state.data
-                    )
+                    is State.Data -> {
+                        sideEffectListener(SideEffect.LoadPage(1))
+                        State.Refresh(
+                            state.pageCount,
+                            state.data
+                        )
+                    }
+                    is State.NewPageProgress -> {
+                        sideEffectListener(SideEffect.LoadPage(1))
+                        State.Refresh(
+                            state.pageCount,
+                            state.data
+                        )
+                    }
+                    is State.FullData -> {
+                        sideEffectListener(SideEffect.LoadPage(1))
+                        State.Refresh(
+                            state.pageCount,
+                            state.data
+                        )
+                    }
                     else -> state
                 }
             }
             is Action.Restart -> {
-                sideEffectListener(
-                    SideEffect.LoadPage(
-                        1
-                    )
-                )
+                sideEffectListener(SideEffect.CancelLoadings)
+                sideEffectListener(SideEffect.LoadPage(1))
                 when (state) {
                     is State.Empty -> State.EmptyProgress()
                     is State.EmptyError -> State.EmptyProgress()
@@ -175,11 +112,7 @@ object Paginator {
             is Action.LoadMore -> {
                 when (state) {
                     is State.Data -> {
-                        sideEffectListener(
-                            SideEffect.LoadPage(
-                                state.pageCount + 1
-                            )
-                        )
+                        sideEffectListener(SideEffect.LoadPage(state.pageCount + 1))
                         State.NewPageProgress(
                             state.pageCount,
                             state.data
@@ -237,21 +170,29 @@ object Paginator {
                         if (items.isEmpty()) {
                             State.Empty()
                         } else {
-                            State.Data(1, items)
+                            if (action.isLastPage) {
+                                State.FullData(1, items)
+                            } else {
+                                State.Data(1, items)
+                            }
                         }
                     }
                     is State.Refresh -> {
                         if (items.isEmpty()) {
                             State.Empty()
                         } else {
-                            State.Data(1, items)
+                            if (action.isLastPage) {
+                                State.FullData(1, items)
+                            } else {
+                                State.Data(1, items)
+                            }
                         }
                     }
                     is State.NewPageProgress -> {
-                        if (items.isEmpty()) {
+                        if (action.isLastPage) {
                             State.FullData(
-                                state.pageCount,
-                                state.data
+                                state.pageCount + 1,
+                                state.data + items
                             )
                         } else {
                             State.Data(
@@ -263,7 +204,7 @@ object Paginator {
                     else -> state
                 }
             }
-            is Action.InsertData -> {
+            is Action.AddItems -> {
                 when (state) {
                     is State.Data -> State.Data(
                         state.pageCount,
@@ -290,22 +231,14 @@ object Paginator {
                         action.error
                     )
                     is State.Refresh -> {
-                        sideEffectListener(
-                            SideEffect.ErrorEvent(
-                                action.error
-                            )
-                        )
+                        sideEffectListener(SideEffect.ErrorEvent(action.error))
                         State.Data(
                             state.pageCount,
                             state.data
                         )
                     }
                     is State.NewPageProgress -> {
-                        sideEffectListener(
-                            SideEffect.ErrorEvent(
-                                action.error
-                            )
-                        )
+                        sideEffectListener(SideEffect.ErrorEvent(action.error))
                         State.Data(
                             state.pageCount,
                             state.data
@@ -317,27 +250,20 @@ object Paginator {
         }
 
     class Store<T> {
-        private var state: State<T> =
-            State.Empty()
+        private var state: State<T> = State.Empty()
         var render: (State<T>) -> Unit = {}
             set(value) {
                 field = value
                 value(state)
             }
 
-        private val sideEffectsExecutor = Executors.newSingleThreadExecutor()
-        private val sideEffectRelay = PublishRelay.create<SideEffect>()
-        val sideEffects: Observable<SideEffect> =
-            sideEffectRelay
-                .hide()
-                .observeOn(AndroidSchedulers.mainThread())
+        var executeSideEffect: (SideEffect) -> Unit = {}
 
         fun proceed(action: Action<T>) {
             Timber.d("Action: $action")
-            val newState =
-                reducer(action, state) { sideEffect ->
-                    sideEffectsExecutor.submit { sideEffectRelay.accept(sideEffect) }
-                }
+            val newState = reducer(action, state) { sideEffect ->
+                executeSideEffect(sideEffect)
+            }
             if (newState != state) {
                 state = newState
                 Timber.d("New state: $state")
