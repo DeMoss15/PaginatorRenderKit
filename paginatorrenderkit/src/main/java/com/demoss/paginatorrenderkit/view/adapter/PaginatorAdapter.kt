@@ -7,7 +7,7 @@ import com.demoss.paginatorrenderkit.view.model.ProgressItem
 import com.hannesdorfmann.adapterdelegates4.AdapterDelegate
 import com.hannesdorfmann.adapterdelegates4.AsyncListDifferDelegationAdapter
 
-class PaginalAdapter(
+class PaginatorAdapter(
     private val nextPageCallback: (() -> Unit)?,
     vararg delegate: AdapterDelegate<MutableList<PaginatorItem<*>>>
 ) : AsyncListDifferDelegationAdapter<PaginatorItem<*>>(PaginalDiffItemCallback) {

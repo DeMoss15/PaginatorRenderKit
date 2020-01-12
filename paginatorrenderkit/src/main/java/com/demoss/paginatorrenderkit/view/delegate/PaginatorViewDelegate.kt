@@ -4,17 +4,17 @@ import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.demoss.paginatorrenderkit.Paginator
-import com.demoss.paginatorrenderkit.view.adapter.PaginalAdapter
+import com.demoss.paginatorrenderkit.view.adapter.PaginatorAdapter
 import com.demoss.paginatorrenderkit.view.model.PaginatorItem
 import com.hannesdorfmann.adapterdelegates4.AdapterDelegate
 
 class PaginatorViewDelegate(
-    private var refreshCallback: (() -> Unit)? = null,
+    private val refreshCallback: (() -> Unit)? = null,
     nextPageCallback: (() -> Unit)? = null,
-    private var recyclerView: RecyclerView,
-    private var swipeToRefresh: SwipeRefreshLayout,
-    private var emptyView: AbsPaginatorEmptyView,
-    private var fullscreenProgressView: View,
+    private val recyclerView: RecyclerView,
+    private val swipeToRefresh: SwipeRefreshLayout,
+    private val emptyView: AbsPaginatorEmptyView,
+    private val fullscreenProgressView: View,
     vararg delegate: AdapterDelegate<MutableList<PaginatorItem<*>>>
 ) {
 
@@ -33,7 +33,7 @@ class PaginatorViewDelegate(
         *delegate
     )
 
-    private var adapter: PaginalAdapter = PaginalAdapter(nextPageCallback, *delegate)
+    private var adapter: PaginatorAdapter = PaginatorAdapter(nextPageCallback, *delegate)
 
     init {
         swipeToRefresh.setOnRefreshListener { refreshCallback?.invoke() }
