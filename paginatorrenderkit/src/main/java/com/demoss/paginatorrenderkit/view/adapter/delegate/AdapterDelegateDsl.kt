@@ -31,6 +31,6 @@ inline fun <reified T : Any> mutableAdapterDelegate(
     }
 }
 
-abstract class AbsVH<T>(val view: View) : RecyclerView.ViewHolder(view) {
+abstract class AbsVH<T>(view: View) : RecyclerView.ViewHolder(view) {
     abstract fun bindData(item: T)
 }

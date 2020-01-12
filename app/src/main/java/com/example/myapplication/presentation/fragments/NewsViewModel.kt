@@ -16,7 +16,7 @@ class NewsViewModel(private val getTopHeadlinesUseCase: GetTopHeadlinesUseCase) 
             + "$page")
         getTopHeadlinesUseCase.execute(object : DefaultSingleObserver<List<Article>>() {
             override fun onSuccess(t: List<Article>) {
-                Log.d("DEB_TAG", "\nNewsViewModel onSuccess\nLOG:\n")
+                Log.d("DEB_TAG", "\nNewsViewModel onSuccess\nLOG: new data\n")
                 paginator.proceed(
                     Paginator.Action.NewPage(
                         page,

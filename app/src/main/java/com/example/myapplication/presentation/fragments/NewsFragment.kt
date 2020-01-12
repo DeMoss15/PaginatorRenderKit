@@ -22,11 +22,7 @@ class NewsFragment : BaseFragment<NewsViewModel>() {
             viewModel::refresh,
             viewModel::loadNextPage,
             pvArticles,
-            mutableAdapterDelegate(
-                R.layout.item_article
-            ) {
-                ArticleVH(it)
-            }
+            mutableAdapterDelegate(R.layout.item_article) { ArticleVH(it) }
         )
     }
 

@@ -17,7 +17,7 @@ abstract class BasePaginatorViewModel : BaseViewModel() {
         executeSideEffect = {
             when (it) {
                 is Paginator.SideEffect.LoadPage -> loadPage(it.currentPage)
-                is Paginator.SideEffect.ErrorEvent -> { /*todo: handle error here*/ }
+                is Paginator.SideEffect.ErrorEvent -> { it.error.printStackTrace() }
                 is Paginator.SideEffect.CancelLoadings -> cancelLoading()
             }
         }

@@ -47,137 +47,136 @@ object Paginator {
         action: Action<T>,
         state: State<T>,
         sideEffectListener: (SideEffect) -> Unit
-    ): State<T> =
-        when (action) {
-            is Action.Refresh -> {
-                when (state) {
-                    is State.Empty -> State.EmptyProgress()
-                    is State.EmptyError -> State.EmptyProgress()
-                    is State.Data -> {
-                        sideEffectListener(SideEffect.LoadPage(1))
-                        State.Refresh(
-                            state.pageCount,
-                            state.data
-                        )
-                    }
-                    is State.NewPageProgress -> {
-                        sideEffectListener(SideEffect.LoadPage(1))
-                        State.Refresh(
-                            state.pageCount,
-                            state.data
-                        )
-                    }
-                    is State.FullData -> {
-                        sideEffectListener(SideEffect.LoadPage(1))
-                        State.Refresh(
-                            state.pageCount,
-                            state.data
-                        )
-                    }
-                    else -> state
-                }
-            }
-            is Action.Restart -> {
-                sideEffectListener(SideEffect.CancelLoadings)
-                sideEffectListener(SideEffect.LoadPage(1))
-                when (state) {
-                    is State.Empty -> State.EmptyProgress()
-                    is State.EmptyError -> State.EmptyProgress()
-                    is State.Data -> State.EmptyProgress()
-                    is State.Refresh -> State.EmptyProgress()
-                    is State.NewPageProgress -> State.EmptyProgress()
-                    is State.FullData -> State.EmptyProgress()
-                    else -> state
-                }
-            }
-            is Action.LoadMore -> {
-                when (state) {
-                    is State.Data -> {
-                        sideEffectListener(SideEffect.LoadPage(state.pageCount + 1))
-                        State.NewPageProgress(
-                            state.pageCount,
-                            state.data
-                        )
-                    }
-                    else -> state
-                }
-            }
-            is Action.NewPage -> {
-                val items = action.items
-                when (state) {
-                    is State.EmptyProgress -> {
-                        if (items.isEmpty()) {
-                            State.Empty()
-                        } else {
-                            if (action.isLastPage) {
-                                State.FullData(1, items)
-                            } else {
-                                State.Data(1, items)
-                            }
-                        }
-                    }
-                    is State.Refresh -> {
-                        if (items.isEmpty()) {
-                            State.Empty()
-                        } else {
-                            if (action.isLastPage) {
-                                State.FullData(1, items)
-                            } else {
-                                State.Data(1, items)
-                            }
-                        }
-                    }
-                    is State.NewPageProgress -> {
-                        if (action.isLastPage) {
-                            State.FullData(
-                                state.pageCount + 1,
-                                state.data + items
-                            )
-                        } else {
-                            State.Data(
-                                state.pageCount + 1,
-                                state.data + items
-                            )
-                        }
-                    }
-                    else -> state
-                }
-            }
-            is Action.PageError -> {
-                when (state) {
-                    is State.EmptyProgress -> State.EmptyError(
-                        action.error
+    ): State<T> = when (action) {
+        is Action.Refresh -> {
+            when (state) {
+                is State.Empty -> State.EmptyProgress()
+                is State.EmptyError -> State.EmptyProgress()
+                is State.Data -> {
+                    sideEffectListener(SideEffect.LoadPage(1))
+                    State.Refresh(
+                        state.pageCount,
+                        state.data
                     )
-                    is State.Refresh -> {
-                        sideEffectListener(SideEffect.ErrorEvent(action.error))
-                        State.Data(
-                            state.pageCount,
-                            state.data
-                        )
-                    }
-                    is State.NewPageProgress -> {
-                        sideEffectListener(SideEffect.ErrorEvent(action.error))
-                        State.Data(
-                            state.pageCount,
-                            state.data
-                        )
-                    }
-                    else -> state
                 }
-            }
-            is Action.EditCurrentStateData -> {
-                val editedData = action.transaction(state.getStateData())
-                when(state) {
-                    is State.Empty -> State.Empty()
-                    is State.EmptyProgress -> State.EmptyProgress()
-                    is State.EmptyError -> State.EmptyError(state.error)
-                    is State.Data -> State.Data(state.pageCount, editedData)
-                    is State.Refresh -> State.Refresh(state.pageCount, editedData)
-                    is State.NewPageProgress -> State.NewPageProgress(state.pageCount, editedData)
-                    is State.FullData -> State.FullData(state.pageCount, editedData)
+                is State.NewPageProgress -> {
+                    sideEffectListener(SideEffect.LoadPage(1))
+                    State.Refresh(
+                        state.pageCount,
+                        state.data
+                    )
                 }
+                is State.FullData -> {
+                    sideEffectListener(SideEffect.LoadPage(1))
+                    State.Refresh(
+                        state.pageCount,
+                        state.data
+                    )
+                }
+                else -> state
             }
         }
+        is Action.Restart -> {
+            sideEffectListener(SideEffect.CancelLoadings)
+            sideEffectListener(SideEffect.LoadPage(1))
+            when (state) {
+                is State.Empty -> State.EmptyProgress()
+                is State.EmptyError -> State.EmptyProgress()
+                is State.Data -> State.EmptyProgress()
+                is State.Refresh -> State.EmptyProgress()
+                is State.NewPageProgress -> State.EmptyProgress()
+                is State.FullData -> State.EmptyProgress()
+                else -> state
+            }
+        }
+        is Action.LoadMore -> {
+            when (state) {
+                is State.Data -> {
+                    sideEffectListener(SideEffect.LoadPage(state.pageCount + 1))
+                    State.NewPageProgress(
+                        state.pageCount,
+                        state.data
+                    )
+                }
+                else -> state
+            }
+        }
+        is Action.NewPage -> {
+            val items = action.items
+            when (state) {
+                is State.EmptyProgress -> {
+                    if (items.isEmpty()) {
+                        State.Empty()
+                    } else {
+                        if (action.isLastPage) {
+                            State.FullData(1, items)
+                        } else {
+                            State.Data(1, items)
+                        }
+                    }
+                }
+                is State.Refresh -> {
+                    if (items.isEmpty()) {
+                        State.Empty()
+                    } else {
+                        if (action.isLastPage) {
+                            State.FullData(1, items)
+                        } else {
+                            State.Data(1, items)
+                        }
+                    }
+                }
+                is State.NewPageProgress -> {
+                    if (action.isLastPage) {
+                        State.FullData(
+                            state.pageCount + 1,
+                            state.data + items
+                        )
+                    } else {
+                        State.Data(
+                            state.pageCount + 1,
+                            state.data + items
+                        )
+                    }
+                }
+                else -> state
+            }
+        }
+        is Action.PageError -> {
+            when (state) {
+                is State.EmptyProgress -> State.EmptyError(
+                    action.error
+                )
+                is State.Refresh -> {
+                    sideEffectListener(SideEffect.ErrorEvent(action.error))
+                    State.Data(
+                        state.pageCount,
+                        state.data
+                    )
+                }
+                is State.NewPageProgress -> {
+                    sideEffectListener(SideEffect.ErrorEvent(action.error))
+                    State.Data(
+                        state.pageCount,
+                        state.data
+                    )
+                }
+                else -> state
+            }
+        }
+        is Action.EditCurrentStateData -> {
+            val editedData = action.transaction(state.getStateData())
+            when (state) {
+                is State.Empty -> State.Empty()
+                is State.EmptyProgress -> State.EmptyProgress()
+                is State.EmptyError -> State.EmptyError(state.error)
+                is State.Data -> State.Data(state.pageCount, editedData)
+                is State.Refresh -> State.Refresh(state.pageCount, editedData)
+                is State.NewPageProgress -> State.NewPageProgress(state.pageCount, editedData)
+                is State.FullData -> State.FullData(state.pageCount, editedData)
+            }
+        }
+    }
 
     class Store<T> {
 

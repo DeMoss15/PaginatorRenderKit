@@ -1,22 +1,19 @@
 package com.demoss.paginatorrenderkit.view.delegate
 
 import android.view.View
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.demoss.paginatorrenderkit.Paginator
-import com.demoss.paginatorrenderkit.view.PaginatorView
 import com.demoss.paginatorrenderkit.view.adapter.PaginalAdapter
 import com.demoss.paginatorrenderkit.view.model.PaginatorItem
 import com.hannesdorfmann.adapterdelegates4.AdapterDelegate
-import kotlinx.android.synthetic.main.view_paginator.view.*
 
 class PaginatorViewDelegate(
     private var refreshCallback: (() -> Unit)? = null,
     nextPageCallback: (() -> Unit)? = null,
     private var recyclerView: RecyclerView,
     private var swipeToRefresh: SwipeRefreshLayout,
-    private var emptyView: PaginatorEmptyView,
+    private var emptyView: AbsPaginatorEmptyView,
     private var fullscreenProgressView: View,
     vararg delegate: AdapterDelegate<MutableList<PaginatorItem<*>>>
 ) {
@@ -24,15 +21,15 @@ class PaginatorViewDelegate(
     constructor(
         refreshCallback: (() -> Unit)? = null,
         nextPageCallback: (() -> Unit)? = null,
-        paginatorView: PaginatorView,
+        paginatorView: AbsPaginatorView,
         vararg delegate: AdapterDelegate<MutableList<PaginatorItem<*>>>
     ) : this(
         refreshCallback,
         nextPageCallback,
-        paginatorView.recyclerView,
-        paginatorView.swipeToRefresh,
-        paginatorView.emptyView as PaginatorEmptyView,
-        paginatorView.fullscreenProgressView,
+        paginatorView.getRecyclerView(),
+        paginatorView.getSwipeRefreshLayout(),
+        paginatorView.getEmptyView(),
+        paginatorView.getFullScreenProgressView(),
         *delegate
     )
 
@@ -40,12 +37,7 @@ class PaginatorViewDelegate(
 
     init {
         swipeToRefresh.setOnRefreshListener { refreshCallback?.invoke() }
-        recyclerView.apply {
-            layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-            setHasFixedSize(true)
-            adapter = this@PaginatorViewDelegate.adapter
-        }
-        refreshCallback?.invoke()
+        recyclerView.adapter = adapter
     }
 
     fun render(state: Paginator.State<PaginatorItem<*>>) {
