@@ -8,10 +8,6 @@ import com.demoss.paginatorrenderkit.view.model.PaginatorItem
 
 abstract class BasePaginatorViewModel : BaseViewModel() {
 
-    protected val _paginatorState: MutableLiveData<Paginator.State<PaginatorItem<*>>> =
-        MutableLiveData()
-    open val paginatorState: LiveData<Paginator.State<PaginatorItem<*>>> = _paginatorState
-
     protected open val paginator = Paginator.Store<PaginatorItem<*>>().apply {
         render = { _paginatorState.value = it }
         executeSideEffect = {
@@ -22,6 +18,9 @@ abstract class BasePaginatorViewModel : BaseViewModel() {
             }
         }
     }
+
+    protected val _paginatorState: MutableLiveData<Paginator.State<PaginatorItem<*>>> = MutableLiveData()
+    val paginatorState: LiveData<Paginator.State<PaginatorItem<*>>> = _paginatorState
 
     protected abstract fun loadPage(page: Int)
 

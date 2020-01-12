@@ -16,11 +16,7 @@ class NewsViewModel(private val getTopHeadlinesUseCase: GetTopHeadlinesUseCase) 
                 paginator.proceed(
                     Paginator.Action.NewPage(
                         page,
-                        t.map { article ->
-                            PaginatorItem(
-                                article
-                            ) { article.url == it.url }
-                        },
+                        t.map { article -> PaginatorItem(article) { article.url == it.url } },
                         t.isEmpty()
                     )
                 )
