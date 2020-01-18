@@ -1,13 +1,13 @@
-package com.demoss.paginatorrenderkit
+package com.demoss.paginatorrenderkit.view.delegate
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 
-interface PaginatorView {
+interface AbsPaginatorView {
 
     fun getRecyclerView(): RecyclerView
-    fun getSwipeToRefresh(): SwipeRefreshLayout
-    fun getEmptyView(): PaginatorEmptyView
+    fun getSwipeRefreshLayout(): SwipeRefreshLayout
+    fun getEmptyView(): AbsPaginatorEmptyView
     fun getFullScreenProgressView(): View
 }

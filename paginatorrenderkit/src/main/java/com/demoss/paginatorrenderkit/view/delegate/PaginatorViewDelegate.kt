@@ -1,52 +1,46 @@
-package com.demoss.paginatorrenderkit
+package com.demoss.paginatorrenderkit.view.delegate
 
-import android.annotation.SuppressLint
 import android.view.View
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.demoss.paginatorrenderkit.Paginator
+import com.demoss.paginatorrenderkit.view.adapter.PaginatorAdapter
+import com.demoss.paginatorrenderkit.view.model.PaginatorItem
 import com.hannesdorfmann.adapterdelegates4.AdapterDelegate
-import com.hannesdorfmann.adapterdelegates4.AsyncListDifferDelegationAdapter
 
 class PaginatorViewDelegate(
-    private var refreshCallback: (() -> Unit)? = null,
-    private var nextPageCallback: (() -> Unit)? = null,
-    private var recyclerView: RecyclerView,
-    private var swipeToRefresh: SwipeRefreshLayout,
-    private var emptyView: PaginatorEmptyView,
-    private var fullscreenProgressView: View,
-    vararg delegate: AdapterDelegate<MutableList<AbsPaginalItem<*>>>
+    private val refreshCallback: (() -> Unit)? = null,
+    nextPageCallback: (() -> Unit)? = null,
+    private val recyclerView: RecyclerView,
+    private val swipeToRefresh: SwipeRefreshLayout,
+    private val emptyView: AbsPaginatorEmptyView,
+    private val fullscreenProgressView: View,
+    vararg delegate: AdapterDelegate<MutableList<PaginatorItem<*>>>
 ) {
 
     constructor(
         refreshCallback: (() -> Unit)? = null,
         nextPageCallback: (() -> Unit)? = null,
-        paginatorView: PaginatorView,
-        vararg delegate: AdapterDelegate<MutableList<AbsPaginalItem<*>>>
+        paginatorView: AbsPaginatorView,
+        vararg delegate: AdapterDelegate<MutableList<PaginatorItem<*>>>
     ) : this(
         refreshCallback,
         nextPageCallback,
         paginatorView.getRecyclerView(),
-        paginatorView.getSwipeToRefresh(),
+        paginatorView.getSwipeRefreshLayout(),
         paginatorView.getEmptyView(),
         paginatorView.getFullScreenProgressView(),
         *delegate
     )
 
-    private var adapter: PaginalAdapter = PaginalAdapter(*delegate)
+    private var adapter: PaginatorAdapter = PaginatorAdapter(nextPageCallback, *delegate)
 
     init {
         swipeToRefresh.setOnRefreshListener { refreshCallback?.invoke() }
-        recyclerView.apply {
-            layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-            setHasFixedSize(true)
-            adapter = this@PaginatorViewDelegate.adapter
-        }
-        refreshCallback?.invoke()
+        recyclerView.adapter = adapter
     }
 
-    fun render(state: Paginator.State<AbsPaginalItem<*>>) {
+    fun render(state: Paginator.State<PaginatorItem<*>>) {
         recyclerView.post {
             when (state) {
                 is Paginator.State.Empty -> {
@@ -111,54 +105,5 @@ class PaginatorViewDelegate(
 
     private fun View.visible(isVisible: Boolean) {
         visibility = if (isVisible) View.VISIBLE else View.GONE
-    }
-
-    inner class PaginalAdapter(vararg delegate: AdapterDelegate<MutableList<AbsPaginalItem<*>>>) :
-        AsyncListDifferDelegationAdapter<AbsPaginalItem<*>>(
-            object : DiffUtil.ItemCallback<AbsPaginalItem<*>>() {
-                override fun areItemsTheSame(
-                    oldItem: AbsPaginalItem<*>,
-                    newItem: AbsPaginalItem<*>
-                ): Boolean {
-                    if (oldItem === newItem) return true
-                    return oldItem.areItemsTheSame(newItem)
-                }
-
-                override fun getChangePayload(
-                    oldItem: AbsPaginalItem<*>,
-                    newItem: AbsPaginalItem<*>
-                ) = Any() // disable default blink animation
-
-                @SuppressLint("DiffUtilEquals")
-                override fun areContentsTheSame(
-                    oldItem: AbsPaginalItem<*>,
-                    newItem: AbsPaginalItem<*>
-                ) = oldItem == newItem
-            }
-        ) {
-        var fullData = false
-
-        init {
-            items = mutableListOf()
-            @Suppress("UNCHECKED_CAST")
-            delegatesManager.addDelegate(ProgressAdapterDelegate() as AdapterDelegate<MutableList<AbsPaginalItem<*>>>)
-            delegate.forEach { delegatesManager.addDelegate(it) }
-        }
-
-        fun update(data: List<AbsPaginalItem<*>>, isPageProgress: Boolean) {
-            items = mutableListOf<AbsPaginalItem<*>>().apply {
-                addAll(data)
-                if (isPageProgress) add(AbsPaginalItem(ProgressItem) { true })
-            }
-        }
-
-        override fun onBindViewHolder(
-            holder: RecyclerView.ViewHolder,
-            position: Int,
-            payloads: MutableList<Any?>
-        ) {
-            super.onBindViewHolder(holder, position, payloads)
-            if (!fullData && position >= items.size - 3) nextPageCallback?.invoke()
-        }
     }
 }

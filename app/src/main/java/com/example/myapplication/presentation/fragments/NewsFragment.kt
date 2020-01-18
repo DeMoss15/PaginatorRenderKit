@@ -1,10 +1,10 @@
 package com.example.myapplication.presentation.fragments
 
 import androidx.lifecycle.Observer
-import com.example.myapplication.base.BaseFragment
-import com.demoss.paginatorrenderkit.PaginatorViewDelegate
-import com.demoss.paginatorrenderkit.mutableAdapterDelegate
+import com.demoss.paginatorrenderkit.view.adapter.delegate.PaginatorAdapterDelegate
+import com.demoss.paginatorrenderkit.view.delegate.PaginatorViewDelegate
 import com.example.myapplication.R
+import com.example.myapplication.base.BaseFragment
 import kotlinx.android.synthetic.main.fragment_news_empty_progress.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
@@ -22,9 +22,7 @@ class NewsFragment : BaseFragment<NewsViewModel>() {
             viewModel::refresh,
             viewModel::loadNextPage,
             pvArticles,
-            mutableAdapterDelegate(R.layout.item_article) {
-                ArticleVH(it)
-            }
+            PaginatorAdapterDelegate(R.layout.item_article) { ArticleVH(it) }
         )
     }
 
@@ -32,7 +30,7 @@ class NewsFragment : BaseFragment<NewsViewModel>() {
         viewModel.paginatorState.observe(this, Observer {
             paginatorDelegate.render(it)
         })
-        viewModel.loadNextPage()
+        viewModel.restart()
     }
 
     override fun stopObserveViewModel() {
