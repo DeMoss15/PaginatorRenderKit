@@ -5,7 +5,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.demoss.paginatorrenderkit.Paginator
 import com.demoss.paginatorrenderkit.view.adapter.PaginatorAdapter
-import com.demoss.paginatorrenderkit.view.model.PaginatorItem
+import com.demoss.paginatorrenderkit.view.model.AbsPaginatorItem
 import com.hannesdorfmann.adapterdelegates4.AdapterDelegate
 
 class PaginatorViewDelegate(
@@ -15,14 +15,14 @@ class PaginatorViewDelegate(
     private val swipeToRefresh: SwipeRefreshLayout,
     private val emptyView: AbsPaginatorEmptyView,
     private val fullscreenProgressView: View,
-    vararg delegate: AdapterDelegate<MutableList<PaginatorItem<*>>>
+    vararg delegate: AdapterDelegate<MutableList<AbsPaginatorItem<*>>>
 ) {
 
     constructor(
         refreshCallback: (() -> Unit)? = null,
         nextPageCallback: (() -> Unit)? = null,
         paginatorView: AbsPaginatorView,
-        vararg delegate: AdapterDelegate<MutableList<PaginatorItem<*>>>
+        vararg delegate: AdapterDelegate<MutableList<AbsPaginatorItem<*>>>
     ) : this(
         refreshCallback,
         nextPageCallback,
@@ -40,7 +40,7 @@ class PaginatorViewDelegate(
         recyclerView.adapter = adapter
     }
 
-    fun render(state: Paginator.State<PaginatorItem<*>>) {
+    fun render(state: Paginator.State<AbsPaginatorItem<*>>) {
         recyclerView.post {
             when (state) {
                 is Paginator.State.Empty -> {

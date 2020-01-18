@@ -1,8 +1,10 @@
 package com.example.myapplication.presentation.fragments
 
 import androidx.lifecycle.Observer
-import com.demoss.paginatorrenderkit.view.adapter.delegate.PaginatorAdapterDelegate
+import com.demoss.paginatorrenderkit.Paginator
+import com.demoss.paginatorrenderkit.view.adapter.delegate.PaginatorAdapterDelegateFabric
 import com.demoss.paginatorrenderkit.view.delegate.PaginatorViewDelegate
+import com.demoss.paginatorrenderkit.view.model.AbsPaginatorItem
 import com.example.myapplication.R
 import com.example.myapplication.base.BaseFragment
 import kotlinx.android.synthetic.main.fragment_news_empty_progress.*
@@ -22,13 +24,13 @@ class NewsFragment : BaseFragment<NewsViewModel>() {
             viewModel::refresh,
             viewModel::loadNextPage,
             pvArticles,
-            PaginatorAdapterDelegate(R.layout.item_article) { ArticleVH(it) }
+            PaginatorAdapterDelegateFabric.create(R.layout.item_article) { ArticleVH(it) }
         )
     }
 
     override fun observeViewModel() {
         viewModel.paginatorState.observe(this, Observer {
-            paginatorDelegate.render(it)
+            paginatorDelegate.render(it as Paginator.State<AbsPaginatorItem<*>>)
         })
         viewModel.restart()
     }
