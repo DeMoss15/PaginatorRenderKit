@@ -1,6 +1,5 @@
 package com.demoss.paginatorrenderkit.view.adapter
 
-import android.annotation.SuppressLint
 import androidx.recyclerview.widget.DiffUtil
 
 object PaginatorDiffItemCallbackFabric {
@@ -25,7 +24,6 @@ object PaginatorDiffItemCallbackFabric {
         ) = if (oldItem is T && newItem is T) getChangePayload(oldItem, newItem)
         else Any()
 
-        @SuppressLint("DiffUtilEquals")
         override fun areContentsTheSame(
             oldItem: Any,
             newItem: Any

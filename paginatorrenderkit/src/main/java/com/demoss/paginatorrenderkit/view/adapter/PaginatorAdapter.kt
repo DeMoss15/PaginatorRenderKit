@@ -16,7 +16,7 @@ import com.hannesdorfmann.adapterdelegates4.AdapterDelegate
 class PaginatorAdapter(
     private val nextPageCallback: (() -> Unit)?,
     diffItemCallback: DiffUtil.ItemCallback<Any>,
-    vararg delegate: AdapterDelegate<MutableList<Any>>
+    vararg delegate: AdapterDelegate<out MutableList<out Any>>
 ) : AbsPaginatorAdapter<Any>(diffItemCallback) {
 
     companion object {
@@ -25,9 +25,9 @@ class PaginatorAdapter(
 
     init {
         items = mutableListOf()
-        @Suppress("UNCHECKED_CAST")
         delegatesManager.addDelegate(ProgressAdapterDelegate())
-        delegate.forEach { delegatesManager.addDelegate(it) }
+        @Suppress("UNCHECKED_CAST")
+        delegate.forEach { delegatesManager.addDelegate(it as AdapterDelegate<MutableList<Any>>) }
     }
 
     override fun update(data: List<Any>, isPageProgress: Boolean) {
