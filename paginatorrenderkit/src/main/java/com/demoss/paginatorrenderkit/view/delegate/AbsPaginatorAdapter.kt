@@ -5,7 +5,7 @@ import com.hannesdorfmann.adapterdelegates4.AsyncListDifferDelegationAdapter
 
 /**
  * The abstract recycler view adapter for @see[PaginatorViewDelegate]
- * created for more scalability
+ * created for more scalability (added parameter and method used in [PaginatorViewDelegate])
  *
  * [AsyncListDifferDelegationAdapter] is a part of [adapterdelegates4] library
  * all links are provided in @see[README.md]

@@ -2,6 +2,7 @@ package com.example.myapplication.presentation.fragments
 
 import androidx.lifecycle.Observer
 import com.demoss.paginatorrenderkit.Paginator
+import com.demoss.paginatorrenderkit.view.adapter.PaginatorAdapter
 import com.demoss.paginatorrenderkit.view.adapter.delegate.PaginatorAdapterDelegateFabric
 import com.demoss.paginatorrenderkit.view.delegate.PaginatorViewDelegate
 import com.demoss.paginatorrenderkit.view.model.AbsPaginatorItem
@@ -19,12 +20,14 @@ class NewsFragment : BaseFragment<NewsViewModel>() {
     override val layoutResourceId: Int = R.layout.fragment_news_empty_progress
     override val viewModel by viewModel<NewsViewModel>()
 
-    private val paginatorDelegate: PaginatorViewDelegate by lazy {
-        PaginatorViewDelegate(
+    private val paginatorDelegate: PaginatorViewDelegate<AbsPaginatorItem<*>> by lazy {
+        PaginatorViewDelegate<AbsPaginatorItem<*>>(
             viewModel::refresh,
-            viewModel::loadNextPage,
-            pvArticles,
-            PaginatorAdapterDelegateFabric.create(R.layout.item_article) { ArticleVH(it) }
+            PaginatorAdapter(
+                viewModel::loadNextPage,
+                PaginatorAdapterDelegateFabric.create(R.layout.item_article) { ArticleVH(it) }
+            ),
+            pvArticles
         )
     }
 
