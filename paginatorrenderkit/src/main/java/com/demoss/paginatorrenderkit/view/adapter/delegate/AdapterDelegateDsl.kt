@@ -11,7 +11,7 @@ import com.hannesdorfmann.adapterdelegates4.AdapterDelegate
 
 object PaginatorAdapterDelegateFabric {
 
-    inline fun <reified T : Any> create(
+    inline fun <reified T : Any> createPaginal(
         @LayoutRes layout: Int,
         crossinline customViewTypePredicate: (item: T) -> Boolean = { _ -> true},
         crossinline viewHolderFabric: (View) -> AbsPaginatorVH<in T>
@@ -32,6 +32,30 @@ object PaginatorAdapterDelegateFabric {
             @Suppress("UNCHECKED_CAST")
             holder as AbsPaginatorVH<in T>
             holder.bindData(items[position].data as T)
+        }
+    }
+
+    inline fun <reified T : Any> create(
+        @LayoutRes layout: Int,
+        crossinline customViewTypePredicate: (item: T) -> Boolean = { _ -> true},
+        crossinline viewHolderFabric: (View) -> AbsPaginatorVH<in T>
+    ) = object : AdapterDelegate<MutableList<Any>>() {
+
+        override fun onCreateViewHolder(parent: ViewGroup): RecyclerView.ViewHolder =
+            viewHolderFabric(parent.inflate(layout))
+
+        override fun isForViewType(items: MutableList<Any>, position: Int): Boolean =
+            items[position] is T && customViewTypePredicate(items[position] as T)
+
+        override fun onBindViewHolder(
+            items: MutableList<Any>,
+            position: Int,
+            holder: RecyclerView.ViewHolder,
+            payloads: MutableList<Any>
+        ) {
+            @Suppress("UNCHECKED_CAST")
+            holder as AbsPaginatorVH<in T>
+            holder.bindData(items[position] as T)
         }
     }
 }

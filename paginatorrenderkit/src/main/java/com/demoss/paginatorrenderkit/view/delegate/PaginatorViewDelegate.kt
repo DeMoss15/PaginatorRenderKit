@@ -16,7 +16,7 @@ import com.demoss.paginatorrenderkit.Paginator
  */
 
 class PaginatorViewDelegate<T>(
-    private val refreshCallback: (() -> Unit)? = null,
+    refreshCallback: (() -> Unit)? = null,
     private val adapter: AbsPaginatorAdapter<T>,
     private val recyclerView: RecyclerView,
     private val swipeToRefresh: SwipeRefreshLayout,
