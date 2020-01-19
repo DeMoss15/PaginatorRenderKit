@@ -1,9 +1,25 @@
 package com.demoss.paginatorrenderkit
 
+import com.demoss.paginatorrenderkit.Paginator.Action
+import com.demoss.paginatorrenderkit.Paginator.State
+import com.demoss.paginatorrenderkit.Paginator.Store
+import com.demoss.paginatorrenderkit.Paginator.reducer
 import timber.log.Timber
 
+/**
+ * Original idea and huge peace of code is taken from GitFox client source code
+ * all links are provided in @see[README.md]
+ * or @see[https://github.com/DeMoss15/PaginatorRenderKit]
+ *
+ * Changes:
+ * Added @param[T] for [State], [Action], [Store] and [reducer] for more restrictive data type workflow
+ */
 object Paginator {
 
+    /**
+     * Changes:
+     * Added [getStateData]
+     */
     sealed class State<T> {
 
         open fun getStateData(): List<T> = emptyList<T>()
@@ -28,6 +44,11 @@ object Paginator {
         }
     }
 
+    /**
+     * Changes:
+     * Added action @see[Action.EditCurrentStateData] for compatibility with realtime paginated list
+     * changes (insert, remove, update etc.)
+     */
     sealed class Action<T> {
         class Refresh<T> : Action<T>()
         class Restart<T> : Action<T>()
@@ -37,12 +58,31 @@ object Paginator {
         data class EditCurrentStateData<T>(val transaction: (data: List<T>) -> List<T>) : Action<T>()
     }
 
+    /**
+     * Changes:
+     * Added side effect @see[SideEffect.CancelLoadings] for request optimization and avoid content
+     * duplication
+     */
     sealed class SideEffect {
         data class LoadPage(val currentPage: Int) : SideEffect()
         data class ErrorEvent(val error: Throwable) : SideEffect()
         object CancelLoadings : SideEffect()
     }
 
+    /**
+     * The method contains logic for changing states @see[State] depending on
+     * @see[Action] and current state
+     * Also has side effects @see[SideEffect] to inform business layer about the state's needs
+     *
+     * Changes:
+     * Added side effect @see[SideEffect.CancelLoadings]
+     * Added handling of @see[Action.EditCurrentStateData]
+     * Fixed @see[SideEffect.LoadPage] for each @see[Action.Refresh]
+     *
+     * @param T items' type
+     * @param state current state stored in @see[Store]
+     * @param sideEffectListener informs about state's needs
+     */
     private fun <T> reducer(
         action: Action<T>,
         state: State<T>,
@@ -178,6 +218,17 @@ object Paginator {
         }
     }
 
+    /**
+     * Store represents Paginator states to business layer
+     * Every time you want to use Paginator you should create a new Store
+     * Don't forget to set @property[render] and @property[executeSideEffect]
+     *
+     * Changes:
+     * Removed RxJava dependencies
+     * Added tag to logs
+     *
+     * @param T states' data type
+     */
     class Store<T> {
 
         companion object {

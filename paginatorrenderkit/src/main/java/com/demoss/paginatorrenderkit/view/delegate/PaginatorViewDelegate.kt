@@ -4,43 +4,56 @@ import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.demoss.paginatorrenderkit.Paginator
-import com.demoss.paginatorrenderkit.view.adapter.PaginatorAdapter
-import com.demoss.paginatorrenderkit.view.model.AbsPaginatorItem
-import com.hannesdorfmann.adapterdelegates4.AdapterDelegate
 
-class PaginatorViewDelegate(
+/**
+ * Delegate for setup views in accordance to current @link[Paginator.State]
+ *
+ * @param refreshCallback triggered by @param[swipeToRefresh]
+ * @param adapter will be set to recycler view and notified about new data form new state @see[render]
+ * @param emptyView displays empty data and empty error states
+ *
+ * @author Daniel Mossur
+ */
+
+class PaginatorViewDelegate<T>(
     private val refreshCallback: (() -> Unit)? = null,
-    nextPageCallback: (() -> Unit)? = null,
+    private val adapter: AbsPaginatorAdapter<T>,
     private val recyclerView: RecyclerView,
     private val swipeToRefresh: SwipeRefreshLayout,
     private val emptyView: AbsPaginatorEmptyView,
-    private val fullscreenProgressView: View,
-    vararg delegate: AdapterDelegate<MutableList<AbsPaginatorItem<*>>>
+    private val fullscreenProgressView: View
 ) {
 
+    /**
+     * @param refreshCallback triggered by @param swipeToRefresh
+     * @param adapter will be set to recycler view and notified about new data form new state @see[render]
+     * @param paginatorView provides: @property[recyclerView], @property[swipeToRefresh], @property[emptyView], @property[fullscreenProgressView]
+     * @constructor An alternative to primary constructor
+     */
     constructor(
         refreshCallback: (() -> Unit)? = null,
-        nextPageCallback: (() -> Unit)? = null,
-        paginatorView: AbsPaginatorView,
-        vararg delegate: AdapterDelegate<MutableList<AbsPaginatorItem<*>>>
+        adapter: AbsPaginatorAdapter<T>,
+        paginatorView: AbsPaginatorView
     ) : this(
         refreshCallback,
-        nextPageCallback,
+        adapter,
         paginatorView.getRecyclerView(),
         paginatorView.getSwipeRefreshLayout(),
         paginatorView.getEmptyView(),
-        paginatorView.getFullScreenProgressView(),
-        *delegate
+        paginatorView.getFullScreenProgressView()
     )
-
-    private var adapter: PaginatorAdapter = PaginatorAdapter(nextPageCallback, *delegate)
 
     init {
         swipeToRefresh.setOnRefreshListener { refreshCallback?.invoke() }
         recyclerView.adapter = adapter
     }
 
-    fun render(state: Paginator.State<AbsPaginatorItem<*>>) {
+    /**
+     * The only and the main purpose of the delegate - setup views depending on new state
+     *
+     * @param state could be received from @see[Paginator.Store.render]
+     */
+    fun render(state: Paginator.State<T>) {
         recyclerView.post {
             when (state) {
                 is Paginator.State.Empty -> {
