@@ -94,24 +94,15 @@ object Paginator {
                 is State.EmptyError -> State.EmptyProgress()
                 is State.Data -> {
                     sideEffectListener(SideEffect.LoadPage(1))
-                    State.Refresh(
-                        state.pageCount,
-                        state.data
-                    )
+                    State.Refresh(state.pageCount, state.data)
                 }
                 is State.NewPageProgress -> {
                     sideEffectListener(SideEffect.LoadPage(1))
-                    State.Refresh(
-                        state.pageCount,
-                        state.data
-                    )
+                    State.Refresh(state.pageCount, state.data)
                 }
                 is State.FullData -> {
                     sideEffectListener(SideEffect.LoadPage(1))
-                    State.Refresh(
-                        state.pageCount,
-                        state.data
-                    )
+                    State.Refresh(state.pageCount, state.data)
                 }
                 else -> state
             }
@@ -133,10 +124,7 @@ object Paginator {
             when (state) {
                 is State.Data -> {
                     sideEffectListener(SideEffect.LoadPage(state.pageCount + 1))
-                    State.NewPageProgress(
-                        state.pageCount,
-                        state.data
-                    )
+                    State.NewPageProgress(state.pageCount, state.data)
                 }
                 else -> state
             }
@@ -149,9 +137,9 @@ object Paginator {
                         State.Empty()
                     } else {
                         if (action.isLastPage) {
-                            State.FullData(1, items)
+                            State.FullData(action.pageNumber, items)
                         } else {
-                            State.Data(1, items)
+                            State.Data(action.pageNumber, items)
                         }
                     }
                 }
@@ -160,23 +148,17 @@ object Paginator {
                         State.Empty()
                     } else {
                         if (action.isLastPage) {
-                            State.FullData(1, items)
+                            State.FullData(action.pageNumber, items)
                         } else {
-                            State.Data(1, items)
+                            State.Data(action.pageNumber, items)
                         }
                     }
                 }
                 is State.NewPageProgress -> {
                     if (action.isLastPage) {
-                        State.FullData(
-                            state.pageCount + 1,
-                            state.data + items
-                        )
+                        State.FullData(action.pageNumber, state.data + items)
                     } else {
-                        State.Data(
-                            state.pageCount + 1,
-                            state.data + items
-                        )
+                        State.Data(action.pageNumber, state.data + items)
                     }
                 }
                 else -> state
@@ -184,22 +166,14 @@ object Paginator {
         }
         is Action.PageError -> {
             when (state) {
-                is State.EmptyProgress -> State.EmptyError(
-                    action.error
-                )
+                is State.EmptyProgress -> State.EmptyError(action.error)
                 is State.Refresh -> {
                     sideEffectListener(SideEffect.ErrorEvent(action.error))
-                    State.Data(
-                        state.pageCount,
-                        state.data
-                    )
+                    State.Data(state.pageCount, state.data)
                 }
                 is State.NewPageProgress -> {
                     sideEffectListener(SideEffect.ErrorEvent(action.error))
-                    State.Data(
-                        state.pageCount,
-                        state.data
-                    )
+                    State.Data(state.pageCount, state.data)
                 }
                 else -> state
             }
