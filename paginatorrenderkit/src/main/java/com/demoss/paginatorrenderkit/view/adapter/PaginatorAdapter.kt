@@ -1,10 +1,11 @@
 package com.demoss.paginatorrenderkit.view.adapter
 
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.demoss.paginatorrenderkit.view.adapter.delegate.ProgressAdapterDelegate
 import com.demoss.paginatorrenderkit.view.delegate.AbsPaginatorAdapter
 import com.demoss.paginatorrenderkit.view.model.AbsPaginatorItem
-import com.demoss.paginatorrenderkit.view.model.ProgressItem
+import com.demoss.paginatorrenderkit.view.model.PaginatorProgressItem
 import com.hannesdorfmann.adapterdelegates4.AdapterDelegate
 
 /**
@@ -14,8 +15,9 @@ import com.hannesdorfmann.adapterdelegates4.AdapterDelegate
  */
 class PaginatorAdapter(
     private val nextPageCallback: (() -> Unit)?,
-    vararg delegate: AdapterDelegate<MutableList<AbsPaginatorItem<*>>>
-) : AbsPaginatorAdapter<AbsPaginatorItem<*>>(PaginalDiffItemCallback) {
+    diffItemCallback: DiffUtil.ItemCallback<Any>,
+    vararg delegate: AdapterDelegate<out MutableList<out Any>>
+) : AbsPaginatorAdapter<Any>(diffItemCallback) {
 
     companion object {
         const val NEXT_PAGE_REQUEST_OFFSET = 3
@@ -23,15 +25,15 @@ class PaginatorAdapter(
 
     init {
         items = mutableListOf()
+        delegatesManager.addDelegate(ProgressAdapterDelegate())
         @Suppress("UNCHECKED_CAST")
-        delegatesManager.addDelegate(ProgressAdapterDelegate() as AdapterDelegate<MutableList<AbsPaginatorItem<*>>>)
-        delegate.forEach { delegatesManager.addDelegate(it) }
+        delegate.forEach { delegatesManager.addDelegate(it as AdapterDelegate<MutableList<Any>>) }
     }
 
-    override fun update(data: List<AbsPaginatorItem<*>>, isPageProgress: Boolean) {
-        items = mutableListOf<AbsPaginatorItem<*>>().apply {
+    override fun update(data: List<Any>, isPageProgress: Boolean) {
+        items = mutableListOf<Any>().apply {
             addAll(data)
-            if (isPageProgress) add(ProgressItem)
+            if (isPageProgress) add(PaginatorProgressItem)
         }
     }
 

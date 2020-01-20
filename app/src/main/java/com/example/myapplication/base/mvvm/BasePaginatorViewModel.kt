@@ -4,14 +4,13 @@ import androidx.annotation.CallSuper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.demoss.paginatorrenderkit.Paginator
-import com.demoss.paginatorrenderkit.view.model.PaginatorItem
 
 abstract class BasePaginatorViewModel : BaseViewModel() {
 
-    protected val _paginatorState: MutableLiveData<Paginator.State<PaginatorItem<*>>> = MutableLiveData()
-    val paginatorState: LiveData<Paginator.State<PaginatorItem<*>>> = _paginatorState
+    protected val _paginatorState: MutableLiveData<Paginator.State<Any>> = MutableLiveData()
+    val paginatorState: LiveData<Paginator.State<Any>> = _paginatorState
 
-    protected open val paginator = Paginator.Store<PaginatorItem<*>>().apply {
+    protected open val paginator = Paginator.Store<Any>().apply {
         render = { _paginatorState.value = it }
         executeSideEffect = {
             when (it) {

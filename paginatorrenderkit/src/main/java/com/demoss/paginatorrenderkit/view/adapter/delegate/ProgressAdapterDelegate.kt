@@ -5,20 +5,19 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.demoss.paginatorrenderkit.R
 import com.demoss.paginatorrenderkit.view.inflate
-import com.demoss.paginatorrenderkit.view.model.AbsPaginatorItem
-import com.demoss.paginatorrenderkit.view.model.PaginatorProgress
+import com.demoss.paginatorrenderkit.view.model.PaginatorProgressItem
 import com.hannesdorfmann.adapterdelegates4.AdapterDelegate
 
-class ProgressAdapterDelegate : AdapterDelegate<MutableList<AbsPaginatorItem<PaginatorProgress>>>() {
+class ProgressAdapterDelegate : AdapterDelegate<MutableList<Any>>() {
 
-    override fun isForViewType(items: MutableList<AbsPaginatorItem<PaginatorProgress>>, position: Int) =
-        items[position].isForViewType(PaginatorProgress::class.java)
+    override fun isForViewType(items: MutableList<Any>, position: Int): Boolean =
+        items[position] is PaginatorProgressItem
 
     override fun onCreateViewHolder(parent: ViewGroup): RecyclerView.ViewHolder =
         ViewHolder(parent.inflate(R.layout.item_progress))
 
     override fun onBindViewHolder(
-        items: MutableList<AbsPaginatorItem<PaginatorProgress>>,
+        items: MutableList<Any>,
         position: Int,
         holder: RecyclerView.ViewHolder,
         payloads: MutableList<Any>

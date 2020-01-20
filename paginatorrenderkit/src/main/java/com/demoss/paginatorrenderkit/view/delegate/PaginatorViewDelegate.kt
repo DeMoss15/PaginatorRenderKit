@@ -15,9 +15,9 @@ import com.demoss.paginatorrenderkit.Paginator
  * @author Daniel Mossur
  */
 
-class PaginatorViewDelegate<T>(
-    private val refreshCallback: (() -> Unit)? = null,
-    private val adapter: AbsPaginatorAdapter<T>,
+class PaginatorViewDelegate<T : Any>(
+    refreshCallback: (() -> Unit)? = null,
+    private val adapter: AbsPaginatorAdapter<in T>,
     private val recyclerView: RecyclerView,
     private val swipeToRefresh: SwipeRefreshLayout,
     private val emptyView: AbsPaginatorEmptyView,
@@ -32,7 +32,7 @@ class PaginatorViewDelegate<T>(
      */
     constructor(
         refreshCallback: (() -> Unit)? = null,
-        adapter: AbsPaginatorAdapter<T>,
+        adapter: AbsPaginatorAdapter<in T>,
         paginatorView: AbsPaginatorView
     ) : this(
         refreshCallback,
@@ -53,7 +53,7 @@ class PaginatorViewDelegate<T>(
      *
      * @param state could be received from @see[Paginator.Store.render]
      */
-    fun render(state: Paginator.State<T>) {
+    fun render(state: Paginator.State<out T>) {
         recyclerView.post {
             when (state) {
                 is Paginator.State.Empty -> {
