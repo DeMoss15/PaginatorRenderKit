@@ -1,34 +1,39 @@
 package com.demoss.paginatorrenderkit.view.adapter
 
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.demoss.paginatorrenderkit.view.adapter.delegate.ProgressAdapterDelegate
-import com.demoss.paginatorrenderkit.view.model.PaginatorItem
-import com.demoss.paginatorrenderkit.view.model.ProgressItem
+import com.demoss.paginatorrenderkit.view.delegate.AbsPaginatorAdapter
+import com.demoss.paginatorrenderkit.view.model.AbsPaginatorItem
+import com.demoss.paginatorrenderkit.view.model.PaginatorProgressItem
 import com.hannesdorfmann.adapterdelegates4.AdapterDelegate
-import com.hannesdorfmann.adapterdelegates4.AsyncListDifferDelegationAdapter
 
+/**
+ * An implementation of @see[AbsPaginatorAdapter],
+ * [AbsPaginatorItem]-oriented solution
+ *
+ */
 class PaginatorAdapter(
     private val nextPageCallback: (() -> Unit)?,
-    vararg delegate: AdapterDelegate<MutableList<PaginatorItem<*>>>
-) : AsyncListDifferDelegationAdapter<PaginatorItem<*>>(PaginalDiffItemCallback) {
+    diffItemCallback: DiffUtil.ItemCallback<Any>,
+    vararg delegate: AdapterDelegate<out MutableList<out Any>>
+) : AbsPaginatorAdapter<Any>(diffItemCallback) {
 
     companion object {
         const val NEXT_PAGE_REQUEST_OFFSET = 3
     }
 
-    var fullData = false
-
     init {
         items = mutableListOf()
+        delegatesManager.addDelegate(ProgressAdapterDelegate())
         @Suppress("UNCHECKED_CAST")
-        delegatesManager.addDelegate(ProgressAdapterDelegate() as AdapterDelegate<MutableList<PaginatorItem<*>>>)
-        delegate.forEach { delegatesManager.addDelegate(it) }
+        delegate.forEach { delegatesManager.addDelegate(it as AdapterDelegate<MutableList<Any>>) }
     }
 
-    fun update(data: List<PaginatorItem<*>>, isPageProgress: Boolean) {
-        items = mutableListOf<PaginatorItem<*>>().apply {
+    override fun update(data: List<Any>, isPageProgress: Boolean) {
+        items = mutableListOf<Any>().apply {
             addAll(data)
-            if (isPageProgress) add(PaginatorItem(ProgressItem) { true })
+            if (isPageProgress) add(PaginatorProgressItem)
         }
     }
 
