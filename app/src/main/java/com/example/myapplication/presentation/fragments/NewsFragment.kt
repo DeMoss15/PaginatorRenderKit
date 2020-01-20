@@ -34,7 +34,7 @@ class NewsFragment : BaseFragment<NewsViewModel>() {
                     { oldItem: Any, newItem: Any -> Any() }
                 ),
                 ///////////////////////////////////////////////////////////////////////////
-                // both delegates are for AbsPaginatorItem
+                // adapter delegates
                 ///////////////////////////////////////////////////////////////////////////
                 PaginatorAdapterDelegateFabric.create(
                     R.layout.item_article
