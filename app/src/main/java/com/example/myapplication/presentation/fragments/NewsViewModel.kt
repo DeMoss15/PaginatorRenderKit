@@ -20,6 +20,13 @@ class NewsViewModel(private val getTopHeadlinesUseCase: GetTopHeadlinesUseCase) 
                         t.isEmpty()
                     )
                 )
+                if (page == 1) {
+                    paginator.proceed(Paginator.Action.EditCurrentStateData { data ->
+                        val newData = data.toMutableList()
+                        newData.add(0, PaginatorItem(ArticlesHeader) { true })
+                        newData
+                    })
+                }
             }
 
             override fun onError(e: Throwable) {

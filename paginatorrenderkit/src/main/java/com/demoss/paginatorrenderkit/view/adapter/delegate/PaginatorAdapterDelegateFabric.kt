@@ -20,7 +20,7 @@ object PaginatorAdapterDelegateFabric {
             viewHolderFabric(parent.inflate(layout))
 
         override fun isForViewType(items: MutableList<T>, position: Int): Boolean =
-            customViewTypePredicate(items[position] as T)
+            customViewTypePredicate(items[position])
 
         override fun onBindViewHolder(
             items: MutableList<T>,
@@ -30,7 +30,11 @@ object PaginatorAdapterDelegateFabric {
         ) {
             @Suppress("UNCHECKED_CAST")
             holder as AbsPaginatorVH<in T>
-            holder.bindData(items[position] as T)
+            holder.bindData(
+                items[position],
+                payloads.takeIf { it.isNotEmpty() }
+                    ?.get(0) ?: Unit
+            )
         }
     }
 }

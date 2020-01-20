@@ -8,6 +8,7 @@ import com.demoss.paginatorrenderkit.view.delegate.PaginatorViewDelegate
 import com.demoss.paginatorrenderkit.view.model.AbsPaginatorItem
 import com.example.myapplication.R
 import com.example.myapplication.base.BaseFragment
+import com.example.myapplication.domain.model.Article
 import kotlinx.android.synthetic.main.fragment_news_empty_progress.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
@@ -29,9 +30,17 @@ class NewsFragment : BaseFragment<NewsViewModel>() {
                     { oldItem, newItem -> oldItem.areItemsTheSame(newItem) },
                     { oldItem, newItem -> oldItem.getChangePayload(newItem) }
                 ),
+                ///////////////////////////////////////////////////////////////////////////
+                // both delegates are for AbsPaginatorItem
+                ///////////////////////////////////////////////////////////////////////////
                 PaginatorAdapterDelegateFabric.create(
-                    R.layout.item_article
-                ) { ArticleVH(it) }
+                    R.layout.item_article,
+                    { item -> item.isForViewType(Article::class.java) }
+                ) { ArticleVH(it) },
+                PaginatorAdapterDelegateFabric.create(
+                    R.layout.item_articles_header,
+                    { item -> item.isForViewType(ArticlesHeader::class.java) }
+                ) { ArticlesHeaderVH(it) }
             ),
             pvArticles
         )
