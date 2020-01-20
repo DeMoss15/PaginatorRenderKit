@@ -1,6 +1,7 @@
 package com.demoss.paginatorrenderkit.view.adapter
 
 import androidx.recyclerview.widget.DiffUtil
+import com.demoss.paginatorrenderkit.view.model.AbsPaginatorItem
 
 object PaginatorDiffItemCallbackFabric {
 
@@ -29,4 +30,9 @@ object PaginatorDiffItemCallbackFabric {
             newItem: Any
         ) = oldItem == newItem
     }
+
+    fun createForPaginatorItem() = create<AbsPaginatorItem<*>>(
+        { oldItem, newItem -> oldItem.areItemsTheSame(newItem) },
+        { oldItem, newItem -> oldItem.getChangePayload(newItem) }
+    )
 }

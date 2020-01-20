@@ -8,7 +8,6 @@ import com.demoss.paginatorrenderkit.view.delegate.PaginatorViewDelegate
 import com.demoss.paginatorrenderkit.view.model.AbsPaginatorItem
 import com.example.myapplication.R
 import com.example.myapplication.base.BaseFragment
-import com.example.myapplication.domain.model.Article
 import kotlinx.android.synthetic.main.fragment_news_empty_progress.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
@@ -26,20 +25,15 @@ class NewsFragment : BaseFragment<NewsViewModel>() {
             viewModel::refresh,
             PaginatorAdapter(
                 viewModel::loadNextPage,
-                PaginatorDiffItemCallbackFabric.create<AbsPaginatorItem<*>>(
-                    { oldItem, newItem -> oldItem.areItemsTheSame(newItem) },
-                    { oldItem, newItem -> oldItem.getChangePayload(newItem) }
-                ),
+                PaginatorDiffItemCallbackFabric.createForPaginatorItem(),
                 ///////////////////////////////////////////////////////////////////////////
                 // both delegates are for AbsPaginatorItem
                 ///////////////////////////////////////////////////////////////////////////
-                PaginatorAdapterDelegateFabric.create(
-                    R.layout.item_article,
-                    { item -> item.isForViewType(Article::class.java) }
+                PaginatorAdapterDelegateFabric.createForPaginatorItem(
+                    R.layout.item_article
                 ) { ArticleVH(it) },
-                PaginatorAdapterDelegateFabric.create(
-                    R.layout.item_articles_header,
-                    { item -> item.isForViewType(ArticlesHeader::class.java) }
+                PaginatorAdapterDelegateFabric.createForPaginatorItem(
+                    R.layout.item_articles_header
                 ) { ArticlesHeaderVH(it) }
             ),
             pvArticles
