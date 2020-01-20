@@ -3,7 +3,7 @@ package com.demoss.paginatorrenderkit.view.adapter
 import androidx.recyclerview.widget.DiffUtil
 import com.demoss.paginatorrenderkit.view.model.AbsPaginatorItem
 
-object PaginatorDiffItemCallbackFabric {
+object PaginatorDiffItemCallbackFactory {
 
     inline fun <reified T : Any> create(
         crossinline areItemsDataTheSame: (oldItem: T, newItem: T) -> Boolean,

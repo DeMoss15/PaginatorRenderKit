@@ -2,8 +2,8 @@ package com.example.myapplication.presentation.fragments
 
 import androidx.lifecycle.Observer
 import com.demoss.paginatorrenderkit.view.adapter.PaginatorAdapter
-import com.demoss.paginatorrenderkit.view.adapter.PaginatorDiffItemCallbackFabric
-import com.demoss.paginatorrenderkit.view.adapter.delegate.PaginatorAdapterDelegateFabric
+import com.demoss.paginatorrenderkit.view.adapter.PaginatorDiffItemCallbackFactory
+import com.demoss.paginatorrenderkit.view.adapter.delegate.PaginatorAdapterDelegateFactory
 import com.demoss.paginatorrenderkit.view.delegate.PaginatorViewDelegate
 import com.example.myapplication.R
 import com.example.myapplication.base.BaseFragment
@@ -25,21 +25,23 @@ class NewsFragment : BaseFragment<NewsViewModel>() {
             viewModel::refresh,
             PaginatorAdapter(
                 viewModel::loadNextPage,
-                PaginatorDiffItemCallbackFabric.create(
+                PaginatorDiffItemCallbackFactory.create(
                     { oldItem: Any, newItem: Any ->
                         if (oldItem is Article && newItem is Article) {
                             oldItem.url == newItem.url
-                        } else oldItem is ArticlesHeader && newItem is ArticlesHeader
+                        } else {
+                            oldItem is ArticlesHeader && newItem is ArticlesHeader
+                        }
                     },
                     { oldItem: Any, newItem: Any -> Any() }
                 ),
                 ///////////////////////////////////////////////////////////////////////////
                 // adapter delegates
                 ///////////////////////////////////////////////////////////////////////////
-                PaginatorAdapterDelegateFabric.create(
+                PaginatorAdapterDelegateFactory.create(
                     R.layout.item_article
                 ) { ArticleVH(it) },
-                PaginatorAdapterDelegateFabric.create(
+                PaginatorAdapterDelegateFactory.create(
                     R.layout.item_articles_header
                 ) { ArticlesHeaderVH(it) }
             ),

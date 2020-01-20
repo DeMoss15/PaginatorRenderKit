@@ -9,7 +9,7 @@ import com.demoss.paginatorrenderkit.view.inflate
 import com.demoss.paginatorrenderkit.view.model.AbsPaginatorItem
 import com.hannesdorfmann.adapterdelegates4.AdapterDelegate
 
-object PaginatorAdapterDelegateFabric {
+object PaginatorAdapterDelegateFactory {
 
     inline fun <reified T : Any> create(
         @LayoutRes layout: Int,
