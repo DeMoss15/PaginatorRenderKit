@@ -13,16 +13,12 @@ class NewsViewModel(private val getTopHeadlinesUseCase: GetTopHeadlinesUseCase) 
         getTopHeadlinesUseCase.execute(object : DefaultSingleObserver<List<Article>>() {
             override fun onSuccess(t: List<Article>) {
                 paginator.proceed(
-                    Paginator.Action.NewPage(
-                        page,
-                        t,//.map { article -> PaginatorItem(article) { article.url == it.url } },
-                        t.isEmpty()
-                    )
+                    Paginator.Action.NewPage(page, t, t.isEmpty())
                 )
                 if (page == 1) {
                     paginator.proceed(Paginator.Action.EditCurrentStateData { data ->
                         val newData = data.toMutableList()
-                        newData.add(0, ArticlesHeader)//PaginatorItem(ArticlesHeader) { true })
+                        newData.add(0, ArticlesHeader)
                         newData
                     })
                 }
