@@ -180,14 +180,20 @@ object Paginator {
         }
         is Action.EditCurrentStateData -> {
             val editedData = action.transaction(state.getStateData())
-            when (state) {
-                is State.Empty -> State.Empty()
-                is State.EmptyProgress -> State.EmptyProgress()
-                is State.EmptyError -> State.EmptyError(state.error)
-                is State.Data -> State.Data(state.pageCount, editedData)
-                is State.Refresh -> State.Refresh(state.pageCount, editedData)
-                is State.NewPageProgress -> State.NewPageProgress(state.pageCount, editedData)
-                is State.FullData -> State.FullData(state.pageCount, editedData)
+            if (editedData == state.getStateData()) {
+                state
+            } else if (editedData.isEmpty()) {
+                State.Empty()
+            } else {
+                when(state) {
+                    is State.Empty,
+                    is State.EmptyProgress,
+                    is State.EmptyError -> State.FullData(1, editedData)
+                    is State.Data -> State.Data(state.pageCount, editedData)
+                    is State.Refresh -> State.Refresh(state.pageCount, editedData)
+                    is State.NewPageProgress -> State.NewPageProgress(state.pageCount, editedData)
+                    is State.FullData -> State.FullData(state.pageCount, editedData)
+                }
             }
         }
     }
