@@ -5,6 +5,13 @@ import com.demoss.paginatorrenderkit.view.model.AbsPaginatorItem
 
 object PaginatorDiffItemCallbackFactory {
 
+    val forPaginatorItem by lazy {
+        create<AbsPaginatorItem<*>>(
+            { oldItem, newItem -> oldItem.areItemsTheSame(newItem) },
+            { oldItem, newItem -> oldItem.getChangePayload(newItem) }
+        )
+    }
+
     inline fun <reified T : Any> create(
         crossinline areItemsDataTheSame: (oldItem: T, newItem: T) -> Boolean,
         crossinline getChangePayload: (oldItem: T, newItem: T) -> Any = { _, _ -> Any() }
@@ -30,8 +37,4 @@ object PaginatorDiffItemCallbackFactory {
             oldItem == newItem
     }
 
-    fun createForPaginatorItem() = create<AbsPaginatorItem<*>>(
-        { oldItem, newItem -> oldItem.areItemsTheSame(newItem) },
-        { oldItem, newItem -> oldItem.getChangePayload(newItem) }
-    )
 }
