@@ -1,7 +1,6 @@
 package com.example.myapplication.presentation.fragments
 
 import com.demoss.paginatorrenderkit.Paginator
-import com.demoss.paginatorrenderkit.view.model.PaginatorItem
 import com.example.myapplication.base.mvvm.BasePaginatorViewModel
 import com.example.myapplication.domain.model.Article
 import com.example.myapplication.domain.usecase.GetTopHeadlinesUseCase
@@ -14,12 +13,15 @@ class NewsViewModel(private val getTopHeadlinesUseCase: GetTopHeadlinesUseCase) 
         getTopHeadlinesUseCase.execute(object : DefaultSingleObserver<List<Article>>() {
             override fun onSuccess(t: List<Article>) {
                 paginator.proceed(
-                    Paginator.Action.NewPage(
-                        page,
-                        t.map { article -> PaginatorItem(article) { article.url == it.url } },
-                        t.isEmpty()
-                    )
+                    Paginator.Action.NewPage(page, t, t.isEmpty())
                 )
+                if (page == 1) {
+                    paginator.proceed(Paginator.Action.EditCurrentStateData { data ->
+                        val newData = data.toMutableList()
+                        newData.add(0, ArticlesHeader)
+                        newData
+                    })
+                }
             }
 
             override fun onError(e: Throwable) {

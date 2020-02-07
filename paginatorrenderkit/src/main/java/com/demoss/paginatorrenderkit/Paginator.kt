@@ -1,9 +1,25 @@
 package com.demoss.paginatorrenderkit
 
+import com.demoss.paginatorrenderkit.Paginator.Action
+import com.demoss.paginatorrenderkit.Paginator.State
+import com.demoss.paginatorrenderkit.Paginator.Store
+import com.demoss.paginatorrenderkit.Paginator.reducer
 import timber.log.Timber
 
+/**
+ * Original idea and huge peace of code is taken from GitFox client source code
+ * all links are provided in @see[README.md]
+ * or @see[https://github.com/DeMoss15/PaginatorRenderKit]
+ *
+ * Changes:
+ * Added @param[T] for [State], [Action], [Store] and [reducer] for more restrictive data type workflow
+ */
 object Paginator {
 
+    /**
+     * Changes:
+     * Added [getStateData]
+     */
     sealed class State<T> {
 
         open fun getStateData(): List<T> = emptyList<T>()
@@ -28,6 +44,11 @@ object Paginator {
         }
     }
 
+    /**
+     * Changes:
+     * Added action @see[Action.EditCurrentStateData] for compatibility with realtime paginated list
+     * changes (insert, remove, update etc.)
+     */
     sealed class Action<T> {
         class Refresh<T> : Action<T>()
         class Restart<T> : Action<T>()
@@ -37,12 +58,31 @@ object Paginator {
         data class EditCurrentStateData<T>(val transaction: (data: List<T>) -> List<T>) : Action<T>()
     }
 
+    /**
+     * Changes:
+     * Added side effect @see[SideEffect.CancelLoadings] for request optimization and avoid content
+     * duplication
+     */
     sealed class SideEffect {
         data class LoadPage(val currentPage: Int) : SideEffect()
         data class ErrorEvent(val error: Throwable) : SideEffect()
         object CancelLoadings : SideEffect()
     }
 
+    /**
+     * The method contains logic for changing states @see[State] depending on
+     * @see[Action] and current state
+     * Also has side effects @see[SideEffect] to inform business layer about the state's needs
+     *
+     * Changes:
+     * Added side effect @see[SideEffect.CancelLoadings]
+     * Added handling of @see[Action.EditCurrentStateData]
+     * Fixed @see[SideEffect.LoadPage] for each @see[Action.Refresh]
+     *
+     * @param T items' type
+     * @param state current state stored in @see[Store]
+     * @param sideEffectListener informs about state's needs
+     */
     private fun <T> reducer(
         action: Action<T>,
         state: State<T>,
@@ -54,24 +94,15 @@ object Paginator {
                 is State.EmptyError -> State.EmptyProgress()
                 is State.Data -> {
                     sideEffectListener(SideEffect.LoadPage(1))
-                    State.Refresh(
-                        state.pageCount,
-                        state.data
-                    )
+                    State.Refresh(state.pageCount, state.data)
                 }
                 is State.NewPageProgress -> {
                     sideEffectListener(SideEffect.LoadPage(1))
-                    State.Refresh(
-                        state.pageCount,
-                        state.data
-                    )
+                    State.Refresh(state.pageCount, state.data)
                 }
                 is State.FullData -> {
                     sideEffectListener(SideEffect.LoadPage(1))
-                    State.Refresh(
-                        state.pageCount,
-                        state.data
-                    )
+                    State.Refresh(state.pageCount, state.data)
                 }
                 else -> state
             }
@@ -93,10 +124,7 @@ object Paginator {
             when (state) {
                 is State.Data -> {
                     sideEffectListener(SideEffect.LoadPage(state.pageCount + 1))
-                    State.NewPageProgress(
-                        state.pageCount,
-                        state.data
-                    )
+                    State.NewPageProgress(state.pageCount, state.data)
                 }
                 else -> state
             }
@@ -109,9 +137,9 @@ object Paginator {
                         State.Empty()
                     } else {
                         if (action.isLastPage) {
-                            State.FullData(1, items)
+                            State.FullData(action.pageNumber, items)
                         } else {
-                            State.Data(1, items)
+                            State.Data(action.pageNumber, items)
                         }
                     }
                 }
@@ -120,23 +148,17 @@ object Paginator {
                         State.Empty()
                     } else {
                         if (action.isLastPage) {
-                            State.FullData(1, items)
+                            State.FullData(action.pageNumber, items)
                         } else {
-                            State.Data(1, items)
+                            State.Data(action.pageNumber, items)
                         }
                     }
                 }
                 is State.NewPageProgress -> {
                     if (action.isLastPage) {
-                        State.FullData(
-                            state.pageCount + 1,
-                            state.data + items
-                        )
+                        State.FullData(action.pageNumber, state.data + items)
                     } else {
-                        State.Data(
-                            state.pageCount + 1,
-                            state.data + items
-                        )
+                        State.Data(action.pageNumber, state.data + items)
                     }
                 }
                 else -> state
@@ -144,40 +166,66 @@ object Paginator {
         }
         is Action.PageError -> {
             when (state) {
-                is State.EmptyProgress -> State.EmptyError(
-                    action.error
-                )
+                is State.EmptyProgress -> State.EmptyError(action.error)
                 is State.Refresh -> {
                     sideEffectListener(SideEffect.ErrorEvent(action.error))
-                    State.Data(
-                        state.pageCount,
-                        state.data
-                    )
+                    State.Data(state.pageCount, state.data)
                 }
                 is State.NewPageProgress -> {
                     sideEffectListener(SideEffect.ErrorEvent(action.error))
-                    State.Data(
-                        state.pageCount,
-                        state.data
-                    )
+                    State.Data(state.pageCount, state.data)
                 }
                 else -> state
             }
         }
         is Action.EditCurrentStateData -> {
             val editedData = action.transaction(state.getStateData())
-            when (state) {
-                is State.Empty -> State.Empty()
-                is State.EmptyProgress -> State.EmptyProgress()
-                is State.EmptyError -> State.EmptyError(state.error)
-                is State.Data -> State.Data(state.pageCount, editedData)
-                is State.Refresh -> State.Refresh(state.pageCount, editedData)
-                is State.NewPageProgress -> State.NewPageProgress(state.pageCount, editedData)
-                is State.FullData -> State.FullData(state.pageCount, editedData)
+            if (editedData == state.getStateData()) {
+                // nothing changed, return current state
+                state
+            } else if (editedData.isEmpty()) {
+                // edited and state data are different
+                // edited is empty
+                when(state) {
+                    // nothing changes for empty states
+                    is State.Empty -> state
+                    is State.EmptyProgress -> state
+                    is State.EmptyError -> state
+                    // states with data change to empty alternative
+                    is State.Data -> State.Empty()
+                    is State.Refresh -> State.EmptyProgress()
+                    is State.NewPageProgress -> State.EmptyProgress()
+                    is State.FullData -> State.Empty()
+                }
+            } else {
+                // edited and state data are different
+                // edited is not empty
+                when (state) {
+                    // change empty state to non-empty alternative
+                    is State.Empty -> State.FullData(1, editedData)
+                    is State.EmptyProgress -> State.NewPageProgress(1, editedData)
+                    is State.EmptyError -> State.FullData(1, editedData)
+                    // update data in not-empty states
+                    is State.Data -> State.Data(state.pageCount, editedData)
+                    is State.Refresh -> State.Refresh(state.pageCount, editedData)
+                    is State.NewPageProgress -> State.NewPageProgress(state.pageCount, editedData)
+                    is State.FullData -> State.FullData(state.pageCount, editedData)
+                }
             }
         }
     }
 
+    /**
+     * Store represents Paginator states to business layer
+     * Every time you want to use Paginator you should create a new Store
+     * Don't forget to set @property[render] and @property[executeSideEffect]
+     *
+     * Changes:
+     * Removed RxJava dependencies
+     * Added tag to logs
+     *
+     * @param T states' data type
+     */
     class Store<T> {
 
         companion object {
