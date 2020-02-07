@@ -180,14 +180,37 @@ object Paginator {
         }
         is Action.EditCurrentStateData -> {
             val editedData = action.transaction(state.getStateData())
-            when (state) {
-                is State.Empty -> State.Empty()
-                is State.EmptyProgress -> State.EmptyProgress()
-                is State.EmptyError -> State.EmptyError(state.error)
-                is State.Data -> State.Data(state.pageCount, editedData)
-                is State.Refresh -> State.Refresh(state.pageCount, editedData)
-                is State.NewPageProgress -> State.NewPageProgress(state.pageCount, editedData)
-                is State.FullData -> State.FullData(state.pageCount, editedData)
+            if (editedData == state.getStateData()) {
+                // nothing changed, return current state
+                state
+            } else if (editedData.isEmpty()) {
+                // edited and state data are different
+                // edited is empty
+                when(state) {
+                    // nothing changes for empty states
+                    is State.Empty -> state
+                    is State.EmptyProgress -> state
+                    is State.EmptyError -> state
+                    // states with data change to empty alternative
+                    is State.Data -> State.Empty()
+                    is State.Refresh -> State.EmptyProgress()
+                    is State.NewPageProgress -> State.EmptyProgress()
+                    is State.FullData -> State.Empty()
+                }
+            } else {
+                // edited and state data are different
+                // edited is not empty
+                when (state) {
+                    // change empty state to non-empty alternative
+                    is State.Empty -> State.FullData(1, editedData)
+                    is State.EmptyProgress -> State.NewPageProgress(1, editedData)
+                    is State.EmptyError -> State.FullData(1, editedData)
+                    // update data in not-empty states
+                    is State.Data -> State.Data(state.pageCount, editedData)
+                    is State.Refresh -> State.Refresh(state.pageCount, editedData)
+                    is State.NewPageProgress -> State.NewPageProgress(state.pageCount, editedData)
+                    is State.FullData -> State.FullData(state.pageCount, editedData)
+                }
             }
         }
     }
