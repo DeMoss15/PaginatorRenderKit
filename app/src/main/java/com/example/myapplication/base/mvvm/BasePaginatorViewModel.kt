@@ -10,7 +10,7 @@ abstract class BasePaginatorViewModel : BaseViewModel() {
     protected val _paginatorState: MutableLiveData<Paginator.State<Any>> = MutableLiveData()
     val paginatorState: LiveData<Paginator.State<Any>> = _paginatorState
 
-    protected open val paginator = Paginator.Store<Any>().apply {
+    protected open val paginatorStore = Paginator.Store<Any>().apply {
         render = { _paginatorState.value = it }
         executeSideEffect = {
             when (it) {
@@ -26,11 +26,11 @@ abstract class BasePaginatorViewModel : BaseViewModel() {
     protected abstract fun cancelLoading()
 
     @CallSuper
-    open fun restart() = paginator.proceed(Paginator.Action.Restart())
+    open fun restart() = paginatorStore.proceed(Paginator.Action.Restart())
 
     @CallSuper
-    open fun refresh() = paginator.proceed(Paginator.Action.Refresh())
+    open fun refresh() = paginatorStore.proceed(Paginator.Action.Refresh())
 
     @CallSuper
-    open fun loadNextPage() = paginator.proceed(Paginator.Action.LoadMore())
+    open fun loadNextPage() = paginatorStore.proceed(Paginator.Action.LoadMore())
 }

@@ -12,4 +12,12 @@ abstract class RxUseCaseSingle<T, Params> : BaseRxUseCase<Params, Single<T>, Dis
                 .subscribeWith(observer)
         )
     }
+
+    open fun execute(onSuccess: (T)->Unit, onError: (Throwable)->Unit, params: Params) {
+        addDisposable(
+            buildUseCaseObservable(params)
+                .setDefaultSchedulers()
+                .subscribe(onSuccess, onError)
+        )
+    }
 }
