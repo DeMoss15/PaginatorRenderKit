@@ -21,12 +21,12 @@ class NewsFragment : BaseFragment<NewsViewModel>() {
 
     private val paginatorDelegate by lazy {
 
-        val articleDelegate =
+        val articleAdapterDelegate =
             PaginatorAdapterDelegateFactory.createForPaginatorItem(R.layout.item_article) {
                 ArticleVH(it)
             }
 
-        val headerDelegate =
+        val headerAdapterDelegate =
             PaginatorAdapterDelegateFactory.createForPaginatorItem(R.layout.item_articles_header) {
                 ArticlesHeaderVH(it)
             }
@@ -34,8 +34,8 @@ class NewsFragment : BaseFragment<NewsViewModel>() {
         val adapter = PaginatorAdapter(
             viewModel::loadNextPage,
             PaginatorDiffItemCallbackFactory.forPaginatorItem,
-            articleDelegate,
-            headerDelegate
+            articleAdapterDelegate,
+            headerAdapterDelegate
         )
 
         PaginatorViewDelegate(viewModel::refresh, adapter, pvArticles)
