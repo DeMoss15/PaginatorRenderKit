@@ -11,11 +11,11 @@ abstract class BasePaginatorViewModel : BaseViewModel() {
     val paginatorState: LiveData<Paginator.State<Any>> = _paginatorState
 
     protected open val paginatorStore = Paginator.Store<Any>().apply {
-        render = { _paginatorState.value = it }
-        executeSideEffect = {
-            when (it) {
-                is Paginator.SideEffect.LoadPage -> loadPage(it.currentPage)
-                is Paginator.SideEffect.ErrorEvent -> { it.error.printStackTrace() }
+        render = { state -> _paginatorState.value = state }
+        executeSideEffect = { sideEffect ->
+            when (sideEffect) {
+                is Paginator.SideEffect.LoadPage -> loadPage(sideEffect.currentPage)
+                is Paginator.SideEffect.ErrorEvent -> { sideEffect.error.printStackTrace() }
                 is Paginator.SideEffect.CancelLoadings -> cancelLoading()
             }
         }

@@ -33,25 +33,22 @@ class NewsFragment : BaseFragment<NewsViewModel>() {
                             oldItem is ArticlesHeader && newItem is ArticlesHeader
                         }
                     },
-                    { oldItem: Any, newItem: Any -> Any() }
+                    { oldItem: Any, newItem: Any -> Any() /*No animation*/ }
                 ),
-                ///////////////////////////////////////////////////////////////////////////
-                // adapter delegates
-                ///////////////////////////////////////////////////////////////////////////
-                PaginatorAdapterDelegateFactory.create(
-                    R.layout.item_article
-                ) { ArticleVH(it) },
-                PaginatorAdapterDelegateFactory.create(
-                    R.layout.item_articles_header
-                ) { ArticlesHeaderVH(it) }
+                PaginatorAdapterDelegateFactory.create(R.layout.item_article) {
+                    ArticleVH(it)
+                },
+                PaginatorAdapterDelegateFactory.create(R.layout.item_articles_header) {
+                    ArticlesHeaderVH(it)
+                }
             ),
             pvArticles
         )
     }
 
     override fun observeViewModel() {
-        viewModel.paginatorState.observe(this, Observer {
-            paginatorDelegate.render(it)
+        viewModel.paginatorState.observe(this, Observer { state ->
+            paginatorDelegate.render(state)
         })
         viewModel.restart()
     }
