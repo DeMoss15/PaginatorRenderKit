@@ -7,7 +7,6 @@ import com.demoss.paginatorrenderkit.view.adapter.delegate.PaginatorAdapterDeleg
 import com.demoss.paginatorrenderkit.view.delegate.PaginatorViewDelegate
 import com.example.myapplication.R
 import com.example.myapplication.base.BaseFragment
-import com.example.myapplication.domain.model.Article
 import kotlinx.android.synthetic.main.fragment_news_empty_progress.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
@@ -21,29 +20,25 @@ class NewsFragment : BaseFragment<NewsViewModel>() {
     override val viewModel by viewModel<NewsViewModel>()
 
     private val paginatorDelegate by lazy {
-        PaginatorViewDelegate(
-            viewModel::refresh,
-            PaginatorAdapter(
-                viewModel::loadNextPage,
-                PaginatorDiffItemCallbackFactory.create(
-                    { oldItem: Any, newItem: Any ->
-                        if (oldItem is Article && newItem is Article) {
-                            oldItem.url == newItem.url
-                        } else {
-                            oldItem is ArticlesHeader && newItem is ArticlesHeader
-                        }
-                    },
-                    { oldItem: Any, newItem: Any -> Any() /*No animation*/ }
-                ),
-                PaginatorAdapterDelegateFactory.create(R.layout.item_article) {
-                    ArticleVH(it)
-                },
-                PaginatorAdapterDelegateFactory.create(R.layout.item_articles_header) {
-                    ArticlesHeaderVH(it)
-                }
-            ),
-            pvArticles
+
+        val articleDelegate =
+            PaginatorAdapterDelegateFactory.createForPaginatorItem(R.layout.item_article) {
+                ArticleVH(it)
+            }
+
+        val headerDelegate =
+            PaginatorAdapterDelegateFactory.createForPaginatorItem(R.layout.item_articles_header) {
+                ArticlesHeaderVH(it)
+            }
+
+        val adapter = PaginatorAdapter(
+            viewModel::loadNextPage,
+            PaginatorDiffItemCallbackFactory.forPaginatorItem,
+            articleDelegate,
+            headerDelegate
         )
+
+        PaginatorViewDelegate(viewModel::refresh, adapter, pvArticles)
     }
 
     override fun observeViewModel() {
