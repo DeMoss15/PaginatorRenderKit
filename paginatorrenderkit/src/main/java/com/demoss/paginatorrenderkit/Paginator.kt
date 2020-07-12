@@ -5,6 +5,7 @@ import com.demoss.paginatorrenderkit.Paginator.State
 import com.demoss.paginatorrenderkit.Paginator.Store
 import com.demoss.paginatorrenderkit.Paginator.reducer
 import timber.log.Timber
+import java.lang.RuntimeException
 
 /**
  * Original idea and huge peace of code is taken from GitFox client source code
@@ -53,7 +54,12 @@ object Paginator {
         class Refresh<T> : Action<T>()
         class Restart<T> : Action<T>()
         class LoadMore<T> : Action<T>()
-        data class NewPage<T>(val pageNumber: Int, val items: List<T>, val isLastPage: Boolean) : Action<T>()
+        data class NewPage<T>(
+            val pageNumber: Int,
+            val items: List<T>,
+            val isLastPage: Boolean,
+            val conflictResolver: PageConflictResolver = DefaultPageConflictResolver()
+        ) : Action<T>()
         data class PageError<T>(val error: Throwable) : Action<T>()
         data class EditCurrentStateData<T>(val transaction: (data: List<T>) -> List<T>) : Action<T>()
     }
@@ -130,35 +136,39 @@ object Paginator {
             }
         }
         is Action.NewPage -> {
-            val items = action.items
             when (state) {
                 is State.EmptyProgress -> {
-                    if (items.isEmpty()) {
+                    if (action.items.isEmpty()) {
                         State.Empty()
                     } else {
                         if (action.isLastPage) {
-                            State.FullData(action.pageNumber, items)
+                            State.FullData(action.pageNumber, action.items)
                         } else {
-                            State.Data(action.pageNumber, items)
+                            State.Data(action.pageNumber, action.items)
                         }
                     }
                 }
                 is State.Refresh -> {
-                    if (items.isEmpty()) {
+                    if (action.items.isEmpty()) {
                         State.Empty()
                     } else {
                         if (action.isLastPage) {
-                            State.FullData(action.pageNumber, items)
+                            State.FullData(action.pageNumber, action.items)
                         } else {
-                            State.Data(action.pageNumber, items)
+                            State.Data(action.pageNumber, action.items)
                         }
                     }
                 }
                 is State.NewPageProgress -> {
-                    if (action.isLastPage) {
-                        State.FullData(action.pageNumber, state.data + items)
+                    if (action.pageNumber != state.pageCount + 1) {
+                        if (action.isLastPage) {
+                            State.FullData(action.pageNumber, state.data + action.items)
+                        } else {
+                            State.Data(action.pageNumber, state.data + action.items)
+                        }
                     } else {
-                        State.Data(action.pageNumber, state.data + items)
+                        // TODO: thik about better place to locate conflict resolver
+                        action.conflictResolver.resolve(action, state)
                     }
                 }
                 else -> state
